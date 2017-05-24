@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition>
+
+        <p:dialog id="EmailCreateDlg" widgetVar="EmailCreateDialog" modal="true" resizable="false" appendTo="@(body)"  closeOnEscape="true">
+
+            <h:form id="EmailCreateForm">
+
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2">
+                        <p:column>
+                            <p:outputLabel for="emailSolicitante" value="Correo Electr&oacute;nico" />     
+                        </p:column>
+                        <p:column>
+                            <p:inputText id="emailSolicitante" required="true" value="#{mantenimientoMailMB.parametros.cuentaCorreo}">
+                                <f:validator validatorId="com.sisrni.validator.emailValidator" />
+                            </p:inputText>
+                            <p:message for="emailSolicitante" display="tooltip" />  
+                            <p:watermark for="emailSolicitante" value="correo@email.com"/>
+                        </p:column>
+                        <p:column>
+                            <p:outputLabel for="idPuerto" value="Puerto" />     
+                        </p:column>                        
+                        <p:column>
+                            <p:spinner required="true" id="idPuerto" value="#{mantenimientoMailMB.parametros.puerto}" />     
+                        </p:column>
+                        <p:column>
+                            <p:outputLabel for="idSmtp" value="SMTP" />     
+                        </p:column>                        
+                        <p:column>
+                            <p:inputText id="idSmtp" required="true" value="#{mantenimientoMailMB.parametros.smtp}"/>   
+                        </p:column> 
+                        <p:column>
+                            <p:outputLabel for="idActivo" value="Ativo" />     
+                        </p:column>                        
+                        <p:column>
+                            <p:selectBooleanCheckbox id="idActivo" value="#{mantenimientoMailMB.parametros.activo}" />
+                        </p:column>
+
+                    </p:panelGrid>
+                    <br/>
+                    <p:commandButton icon="ui-icon-disk" actionListener="#{mantenimientoMailMB.save}" value="Guardar" 
+                                     update=":BancoListForm" 
+                                     process="@form"
+                                     oncomplete="PF('EmailCreateDialog').hide();"
+                                     />
+                    <span>&nbsp;</span>
+                    <p:commandButton icon="ui-icon-closethick" value="#{crudbundle.Cancel}" onclick="EmailCreateDialog.hide()" immediate="true"/>
+                </h:panelGroup>
+
+            </h:form>
+        </p:dialog>
+
+        <p:confirmDialog widgetVar="deleteDlg" message="Desea eliminar, parametro de correo?" header="Eliminar parametro"  global="true">                        
+            <p:commandButton value="Si"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check"  action="#{mantenimientoMailMB.siRemplazarBecario()}" process="@this" update=":BancoListForm"/>
+            <p:commandButton value="No" styleClass="ui-confirmdialog-no" icon="ui-icon-close"  process="@this" update=":BancoListForm"/>
+        </p:confirmDialog>
+
+        <script type="text/javascript">
+
+            PrimeFaces.validator['custom.emailValidator'] = {
+                pattern: /\S+@\S+/,
+                validate: function (element, value) {
+                    if (!this.pattern.test(value)) {
+                        throw {
+                            summary: 'Validation Error',
+                            detail: value + ' is not a valid email.'
+                        }
+                    }
+                }
+            };
+
+        </script>
+
+    </ui:composition>
+
+</html>

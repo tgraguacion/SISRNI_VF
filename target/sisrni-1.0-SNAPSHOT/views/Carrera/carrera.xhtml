@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition 
+    template="/WEB-INF/templates/layout.xhtml"
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:define name="content">
+        <center>
+            
+            <p:panel style="width: 70%" >  
+                <h2 class="title ui-widget-header ui-corner-all" align="center">Gesti&oacute;n de Carreras</h2>
+                <h:form id="formCarrera">
+                    <p:panelGrid columns="2">
+                        <p:column>
+                            <p:outputLabel for="nombreCarrera" value="Nombre:"/>
+                        </p:column>
+                        <p:column>
+                            <p:inputText id="nombreCarrera" value="#{carreraMB.carrera.nombreCarrera}" required="true" size="50" />
+                            <p:watermark for="nombreCarrera" value="Nombre de la Carrera" id="watermarkNombreCarrera"/>
+                        </p:column>
+                        
+                        <p:outputLabel for="pais" value="Pa&iacute;s: "/>
+                        <p:selectOneMenu id="pais" value="#{carreraMB.paisSelected.idPais}" style="width: 100%" required="true">
+                      <f:selectItem itemLabel="--Seleccione--" itemValue="" noSelectionOption="true"/>
+                      <p:ajax listener="#{carreraMB.onchangePais()}" update="organismo" />
+                      <c:forEach var="pais" items="#{carreraMB.paisesList}">
+                        <f:selectItem itemLabel="#{pais.nombrePais}" itemValue="#{pais.idPais}"/>
+                        </c:forEach>
+                       </p:selectOneMenu>
+                        <p:outputLabel for="organismo" value="Universidad: "/>
+                        <p:selectOneMenu id="organismo" value="#{carreraMB.organismoSelected.idOrganismo}" style="width: 100%" required="true">
+                      <f:selectItem itemLabel="--Seleccione--" itemValue="" noSelectionOption="true"/>
+                      <p:ajax listener="#{carreraMB.onchangeOrganismo()}" update="facultadCarrera" />
+                      <c:forEach var="organismo" items="#{carreraMB.organismosList}">
+                        <f:selectItem itemLabel="#{organismo.nombreOrganismo}" itemValue="#{organismo.idOrganismo}"/>
+                    </c:forEach>
+                     </p:selectOneMenu>
+                        <p:column>
+                            <p:outputLabel for="facultadCarrera" value="Facultad:"/>
+                        </p:column>
+                        <p:column>
+                            <p:selectOneMenu id="facultadCarrera" value="#{carreraMB.facultad.idFacultad}"  style="width: 100%" required="true">
+                                <f:selectItem itemLabel="--Seleccione--" itemValue="" noSelectionOption="true"/>
+                                <c:forEach var="reg" items="#{carreraMB.listFacultad}">
+                                    <f:selectItem itemLabel="#{reg.nombreFacultad}" itemValue="#{reg.idFacultad}"/>
+                                </c:forEach>
+                            </p:selectOneMenu>
+                        </p:column>
+                        <p:column>
+                        </p:column>
+                        <p:column>
+                            <p:commandButton styleClass="boton" rendered="#{!carreraMB.actualizar}" icon="ui-icon-disk"
+                                             actionListener="#{carreraMB.guardarCarrera}" value="Guardar"  update="formCarrera :formTablaCarreraes" process="@this :formCarrera"/>
+
+                            <p:commandButton styleClass="boton" rendered="#{carreraMB.actualizar}" icon="ui-icon-cancel"
+                                             actionListener="#{carreraMB.cancelarCarrera()}" immediate="true" value="Cancelar" update="formCarrera"  process="@this" />
+                            
+                            <p:commandButton styleClass="boton" rendered="#{carreraMB.actualizar}" icon="ui-icon-refresh"
+                                             actionListener="#{carreraMB.actualizarCarrera()}" update="formCarrera :formTablaCarreraes "
+                                             value="Actualizar" />
+
+
+                        </p:column>
+                    </p:panelGrid>
+
+                </h:form>
+                <br></br>
+                <h:form id="formTablaCarreraes">
+                    <p:dataTable var="carrera" value="#{carreraMB.listCarrera}" rows="10" 
+                                 paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                 rowsPerPageTemplate="5,10,15,20" paginator="true"  emptyMessage="No existen carreraes registrados actualmente" >
+                        <p:column headerText="Carrera"  filterBy="#{carrera.nombreCarrera}">
+                            <h:outputText value="#{carrera.nombreCarrera}"/>
+                        </p:column>
+                        <p:column headerText="Pa&iacute;s">
+                                <h:outputText value="#{carrera.idFacultad.idOrganismo.idPais}" >
+                                    <f:converter converterId="nombrePaisConverter"/>
+                                </h:outputText>
+                            </p:column>
+                        <p:column headerText="Universidad" filterBy="#{carrera.idFacultad.idOrganismo.nombreOrganismo}">
+                            <h:outputText value="#{carrera.idFacultad.idOrganismo.nombreOrganismo}"/>
+                        </p:column> 
+                        <p:column headerText="Facultad" filterBy="#{carrera.idFacultad.nombreFacultad}">
+                            <h:outputText value="#{carrera.idFacultad.nombreFacultad}"/>
+                        </p:column> 
+                        <p:column headerText="Opciones" style="width: 15%">
+                            <div style="float: left">
+                                <p:commandLink styleClass="ui-icon ui-icon-pencil" title="Editar" value="Editar"
+                                               actionListener="#{carreraMB.preActualizarCarrera(carrera)}" update=":formCarrera" process="@form:formTablaCarreraes">
+                                </p:commandLink>
+                            </div>
+                            
+                            
+                            
+                            <div style="float: left">
+                                <p:commandLink styleClass="ui-icon ui-icon-closethick"
+                                               title="Eliminar" value="Eliminar"
+                                               actionListener="#{carreraMB.preBorradoCarrera(carrera)}" update=":idEliminacion" />
+                            </div> 
+                        </p:column>
+
+                    </p:dataTable>
+                </h:form>
+            </p:panel>     
+        </center> 
+        
+        
+        <!--'Dialog de confirmacion de la operacion de Borrado'-->
+        <p:confirmDialog widgetVar="confirmDeleteCarreraDlg" header="Borrar Carrera" message="&iquest;Est&aacute; seguro que desea eliminar la Carrera?" 
+                         global="true" showEffect="fade" hideEffect="fade">
+            <h:form id="idEliminacion">
+                <p:panelGrid columns="2">
+                    <h:outputLabel value="Nombre Carrera:"/>
+                    <h:outputText value="#{carreraMB.carrera.nombreCarrera}"/>
+                    <h:outputLabel value="Pa&iacute;s:"/>
+                    <h:outputText value="#{carreraMB.carrera.idFacultad.idOrganismo.idPais}" >
+                        <f:converter converterId="nombrePaisConverter"/>
+                    </h:outputText>
+                    <h:outputLabel value="Universidad:"/>
+                    <h:outputText value="#{carreraMB.carrera.idFacultad.idOrganismo.nombreOrganismo}"/>
+                    <h:outputLabel value="Facultad:"/>
+                    <h:outputText value="#{carreraMB.carrera.idFacultad.nombreFacultad}"/>
+                </p:panelGrid>
+                <br/>
+                <br/>
+            </h:form>
+            <p:commandButton value="S&iacute;"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check" process="@this"
+                              actionListener="#{carreraMB.borrarCarrera()}" update=":formTablaCarreraes"/>
+             <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>

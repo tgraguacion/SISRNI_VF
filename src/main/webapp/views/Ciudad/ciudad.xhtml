@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition 
+    template="/WEB-INF/templates/layout.xhtml"
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:define name="content">
+        <center>
+            
+            <p:panel style="width: 70%">  
+                <h2 class="title ui-widget-header ui-corner-all" align="center">Gesti&oacute;n de Ciudades</h2>
+                <h:form id="formCiudad">
+                    <p:panelGrid columns="2">
+                        <p:column>
+                            <p:outputLabel for="nombreCiudad" value="Nombre:"/>
+                        </p:column>
+                        <p:column>
+                            <p:inputText id="nombreCiudad" value="#{ciudadMB.ciudad.nombreCiudad}" required="true" size="50" />
+                            <p:watermark for="nombreCiudad" value="Nombre de Ciudad" id="watermarkNombreCiudad"/>
+                        </p:column>
+                         <p:column>
+                            <p:outputLabel for="pais" value="Pa&iacute;s:"/>
+                        </p:column>
+                        <p:column>
+                            <p:selectOneMenu id="pais" value="#{ciudadMB.paisSelected.idPais}"  style="width: 100%" required="true" >
+                                <f:selectItem itemLabel="--Seleccione--" itemValue="" noSelectionOption="true"/>
+                             <p:ajax listener="#{ciudadMB.onchangePais()}" update="provinciaCiudad" />
+                             <c:forEach var="pais" items="#{ciudadMB.paisesList}">
+                                    <f:selectItem itemLabel="#{pais.nombrePais}" itemValue="#{pais.idPais}"/>
+                                 </c:forEach>
+                            </p:selectOneMenu>
+                        </p:column>
+                        <p:column>
+                            <p:outputLabel for="provinciaCiudad" value="Estado/Departamento/Provincia:"/>
+                        </p:column>
+                        <p:column>
+                            <p:selectOneMenu id="provinciaCiudad" value="#{ciudadMB.provincia.idProvincia}"  style="width: 100%" required="true">
+                                <f:selectItem itemLabel="--Seleccione--" itemValue="" noSelectionOption="true"/>
+                                <c:forEach var="reg" items="#{ciudadMB.listProvincia}">
+                                    <f:selectItem itemLabel="#{reg.nombreProvincia}" itemValue="#{reg.idProvincia}"/>
+                                </c:forEach>
+                            </p:selectOneMenu>
+                        </p:column>
+                        <p:column>
+                            <p:commandButton styleClass="boton" rendered="#{!ciudadMB.actualizar}" icon="ui-icon-disk"
+                                             actionListener="#{ciudadMB.guardarCiudad}" value="Guardar"  update="formCiudad :formTablaCiudades" process="@this :formCiudad"/>
+
+                            <p:commandButton styleClass="boton" rendered="#{ciudadMB.actualizar}" icon="ui-icon-cancel"
+                                             actionListener="#{ciudadMB.cancelarCiudad()}" immediate="true" value="Cancelar" update="formCiudad"  process="@this" />
+                            
+                            
+                            <p:commandButton styleClass="boton" rendered="#{ciudadMB.actualizar}" icon="ui-icon-refresh"
+                                             actionListener="#{ciudadMB.actualizarCiudad()}" update="formCiudad :formTablaCiudades "
+                                             value="Actualizar" />
+
+                        </p:column>
+                    </p:panelGrid>
+
+                </h:form>
+                <br></br>
+                <h:form id="formTablaCiudades">
+                    <p:dataTable var="ciudad" value="#{ciudadMB.listCiudad}" rows="10" 
+                                 paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                 rowsPerPageTemplate="5,10,15,20" paginator="true"  emptyMessage="No existen ciudades registrados actualmente" >
+                        <p:column headerText="Ciudad"  filterBy="#{ciudad.nombreCiudad}">
+                            <h:outputText value="#{ciudad.nombreCiudad}"/>
+                        </p:column>
+                        <p:column headerText="Estado/Departamento/Provincia" filterBy="#{ciudad.idProvincia.nombreProvincia}">
+                            <h:outputText value="#{ciudad.idProvincia.nombreProvincia}"/>
+                        </p:column>
+                        <p:column headerText="Pa&iacute;s" filterBy="#{ciudad.idProvincia.idPais.nombrePais}">
+                            <h:outputText value="#{ciudad.idProvincia.idPais.nombrePais}"/>
+                        </p:column> 
+                        <p:column headerText="Opciones" style="width: 15%">
+                            <div style="float: left">
+                                <p:commandLink styleClass="ui-icon ui-icon-pencil" title="Editar" value="Editar"
+                                               actionListener="#{ciudadMB.preActualizarCiudad(ciudad)}" update=":formCiudad" process="@form:formTablaCiudades">
+                                </p:commandLink>
+                            </div>
+                            
+                            
+                            
+                            <div style="float: left">
+                                <p:commandLink styleClass="ui-icon ui-icon-closethick"
+                                               title="Eliminar" value="Eliminar"
+                                               actionListener="#{ciudadMB.preBorradoCiudad(ciudad)}" update=":idEliminacion" />
+                            </div> 
+                        </p:column>
+
+                    </p:dataTable>
+                </h:form>
+            </p:panel>     
+        </center> 
+        
+        
+        <!--'Dialog de confirmacion de la operacion de Borrado'-->
+        <p:confirmDialog widgetVar="confirmDeleteCiudadDlg" header="Borrar Ciudad" message="&iquest;Est&aacute; seguro que desea eliminar la Ciudad?" 
+                         global="true" showEffect="fade" hideEffect="fade">
+            <h:form id="idEliminacion">
+                <p:panelGrid columns="2">
+                    <h:outputLabel value="Nombre Ciudad:"/>
+                    <h:outputText value="#{ciudadMB.ciudad.nombreCiudad}"/>
+                    <h:outputLabel value="Estado/Departamento/Provincia:"/>
+                    <h:outputText value="#{ciudadMB.ciudad.idProvincia.nombreProvincia}"/>
+                     <h:outputLabel value="Pa&iacute;s:"/>
+                     <h:outputText value="#{ciudadMB.ciudad.idProvincia.idPais.nombrePais}"/>
+                </p:panelGrid>
+                <br/>
+                <br/>
+            </h:form>
+             <p:commandButton value="S&iacute;"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check" process="@this"
+                              actionListener="#{ciudadMB.borrarCiudad()}" update=":formTablaCiudades"/>
+             <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>

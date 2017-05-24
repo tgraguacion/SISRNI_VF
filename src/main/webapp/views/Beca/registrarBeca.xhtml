@@ -1,0 +1,661 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:composition template="/WEB-INF/templates/layout.xhtml">
+        <ui:define name="content" >
+            <script type="text/javascript">
+                $.mask.definitions['9'] = '';
+                $.mask.definitions['#'] = '[0-9]';
+            </script>
+            <ui:include src="../TipoBeca/Create.xhtml"/>
+            <ui:include src="../ProgramaBeca/Create.xhtml"/>
+            <ui:include src="../Pais/Create.xhtml"/>
+            <ui:include src="../TipoCambio/Create.xhtml"/>
+            <p:outputPanel id="pageTituloRegistrar" rendered="#{!becaMB.actualizar}">
+                <center>
+                    <h1 style="background: #cc0000;color: white;border-radius: 10px">Registro de Beca</h1>
+                </center>   
+            </p:outputPanel>
+            <p:outputPanel id="pageTituloActualizar" rendered="#{becaMB.actualizar}">
+                <center>
+                    <h1 style="background: #cc0000;color: white;border-radius: 10px">Actualizaci&oacute;n de Beca</h1>
+                </center>   
+            </p:outputPanel>
+            <h:form id="formAdmin">
+                <center>
+                    <p:panel style="width: 80%">
+                        <p:accordionPanel multiple="true" activeIndex="0,1,2,3" id="acordion">
+                            <p:tab title="Datos del Becario">
+                                <h:panelGroup id="pgroupBuscadorBecario">
+                                    <p:panelGrid id="pGridBuscadorBecario">
+                                        <p:column>
+                                            <p:outputLabel for="tipoBusquedaBecarioId" value="Criterio de Busqueda:" rendered="#{!becaMB.actualizar}"/>
+                                        </p:column>
+                                        <p:column>                                        
+                                            <p:selectOneMenu id="tipoBusquedaBecarioId" value="#{becaMB.tipoBusquedaBecario}"  style="width:125px" rendered="#{!becaMB.actualizar}">  
+                                                <p:ajax  listener="#{becaMB.habilitarAutoBecario}" update="pgroupBuscadorBecario,panelBecario,botones"  process="tipoBusquedaBecarioId"/>
+                                                <f:selectItem itemLabel="Seleccione" itemValue="0" noSelectionOption="true" />                                                                           
+                                                <f:selectItem itemLabel="Nombre/Apellido" itemValue="nombre" />                                                                           
+                                                <f:selectItem itemLabel="E-mail" itemValue="email" />
+                                                <f:selectItem itemLabel="Documento" itemValue="doc" />  
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel  value="Busqueda" rendered="#{!becaMB.actualizar}"/>     
+                                        </p:column>
+                                        <p:column>
+                                            <p:autoComplete id="searchNombre" rendered="#{becaMB.flagSearchNombreBecario}"
+                                                            value="#{becaMB.becarioAux}" completeMethod="#{becaMB.methodSearch}"
+                                                            var="name" itemLabel="#{name.nombrePersona}" itemValue="#{name}" converter="#{personaConverter}" 
+                                                            forceSelection="true" >                                           
+                                                <p:column>
+                                                    <h:outputText value="#{name.nombrePersona} #{name.apellidoPersona}" />
+                                                </p:column>
+                                                <p:ajax event="itemSelect" listener="#{becaMB.buscarBecarioSinParametro()}" update="panelBecario,botones" process="@this"/>
+                                            </p:autoComplete>
+                                            <p:watermark for="searchNombre" value="Nombre/Apellido"/>
+
+                                            <p:autoComplete id="searchDui" rendered="#{becaMB.flagSearchDuiBecario}" minQueryLength="10" size="10" 
+                                                            value="#{becaMB.becarioAux}" completeMethod="#{becaMB.methodSearch}"
+                                                            var="name" itemLabel="#{name.duiPersona}" itemValue="#{name}" converter="#{personaConverter}"
+                                                            forceSelection="true">                                            
+                                                <p:column>
+                                                    <h:outputText value="#{name.duiPersona}" />
+                                                </p:column>
+                                                <p:ajax event="itemSelect" listener="#{becaMB.buscarBecarioSinParametro()}" update="panelBecario,botones" process="@this"/>
+                                            </p:autoComplete>
+                                            <p:watermark for="searchDui" value="DUI"/> 
+
+                                            <p:autoComplete id="searchMail" rendered="#{becaMB.flagSearchEmailBecario}"
+                                                            value="#{becaMB.becarioAux}" completeMethod="#{becaMB.methodSearch}"
+                                                            var="name" itemLabel="#{name.emailPersona}" itemValue="#{name}" converter="#{personaConverter}" 
+                                                            forceSelection="true">                                           
+                                                <p:column>
+                                                    <h:outputText value="#{name.emailPersona}" />
+                                                </p:column>
+                                                <p:ajax event="itemSelect" listener="#{becaMB.buscarBecarioSinParametro()}" update="panelBecario,botones" process="@this"/>
+                                            </p:autoComplete>
+                                            <p:watermark for="searchMail" value="E-mail"/> 
+                                        </p:column>
+                                    </p:panelGrid>
+                                </h:panelGroup>
+                                <h:panelGroup id="botones">
+                                    <p:column>
+                                        <p:commandButton value="Nuevo" icon="ui-icon-plus" actionListener="#{becaMB.presionoNuevoBecario()}" rendered="#{becaMB.renderNuevaPersonaBecarioButton}" process="@this" update="panelBecario"/>
+                                        <p:commandButton value="Editar" icon="ui-icon-pencil" actionListener="#{becaMB.presionoActualizarBecario()}" rendered="#{becaMB.renderActualizarPersonaBecarioButton}" process="@this" update="panelBecario"/>
+                                    </p:column>
+                                </h:panelGroup>
+                                <p:separator/>
+                                <p:panelGrid id="panelBecario">
+                                    <p:row>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.nombreBecario}" for="nombrebecario"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:inputText id="nombrebecario" value="#{becaMB.becario.nombrePersona}" disabled="#{becaMB.disableBecarioInputs and !becaMB.actualizar}" required="true" />
+
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.apellidos}" for="apellidobecario"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:inputText id="apellidobecario" value="#{becaMB.becario.apellidoPersona}" required="true" disabled="#{becaMB.disableBecarioInputs and !becaMB.actualizar}"/>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.dui}"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:inputMask id="duibecario" mask="########-#" value="#{becaMB.becario.duiPersona}" disabled="#{becaMB.disableBecarioInputs and !becaMB.actualizar}"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.correo}" for="correobecario"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:inputText id="correobecario" value="#{becaMB.becario.emailPersona}" required="true" disabled="#{becaMB.disableBecarioInputs and !becaMB.actualizar}">
+                                                <f:validator validatorId="com.sisrni.validator.emailValidator"/>
+                                            </p:inputText>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.facultad}" for="facultadbecario"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectOneMenu id="facultadbecario" value="#{becaMB.facultadSelectedBecario.idFacultad}"  style="width:180px" required="true" disabled="#{becaMB.disableBecarioInputs and !becaMB.actualizar}">
+                                                <f:selectItem itemLabel="--Seleccione--" itemValue="" noSelectionOption="true"/>
+                                                <p:ajax event="change" listener="#{becaMB.getCarrerasByFacultad}" process="@this" update="carreraBecario"/>
+                                                <c:forEach var="fac" items="#{becaMB.facultadList}">
+                                                    <f:selectItem itemLabel="#{fac.nombreFacultad}" itemValue="#{fac.idFacultad}"/>
+                                                </c:forEach>
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.carrera}" for="carreraBecario"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectOneMenu id="carreraBecario" value="#{becaMB.carreraSelected.idCarrera}"  style="width:180px" required="true" disabled="#{becaMB.disableBecarioInputs and !becaMB.actualizar}">
+                                                <f:selectItem itemLabel="--Seleccione--" itemValue="" noSelectionOption="true"/>
+                                                <c:forEach var="carrera" items="#{becaMB.carreraList}">
+                                                    <f:selectItem itemLabel="#{carrera.nombreCarrera}" itemValue="#{carrera.idCarrera}"/>
+                                                </c:forEach>
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.telefonoFijo}"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:inputMask id="telefonobecario" value="#{becaMB.telefonoFijoBecario.numeroTelefono}" mask="+503-####-####" disabled="#{becaMB.disableBecarioInputs and !becaMB.actualizar}"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel for="telefonoCelular" value="#{lbecas.telefonoCelular}"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:inputMask id="telefonoCelular" value="#{becaMB.telefonoCelularBecario.numeroTelefono}" mask="+503-####-####" disabled="#{becaMB.disableBecarioInputs and !becaMB.actualizar}" required="true" />
+                                        </p:column>
+                                    </p:row>
+                                </p:panelGrid>
+                            </p:tab>
+                            <p:tab title="Datos de la Beca">
+                                <p:panelGrid>
+                                    <p:row>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.tipoBeca}" for="tipoBeca"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectOneMenu id="tipoBeca" value="#{becaMB.tipoBecaSelected.idTipoBeca}"  style="width:180px" required="true">
+                                                <f:selectItem itemLabel="--Seleccione--" itemValue="" />
+                                                <c:forEach var="tb" items="#{tipoBecaMB.listaBecas()}">
+                                                    <f:selectItem itemLabel="#{tb.nombreTipoBeca}" itemValue="#{tb.idTipoBeca}"/>
+                                                </c:forEach>
+                                                <p:ajax event="change" listener="#{becaMB.addNewTipoBeca}" process="@this" update="formAdmin:acordion:tipoBeca"/>
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.programaBeca}" for="programaBecas"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectOneMenu id="programaBecas" value="#{becaMB.programaBecaSelected.idPrograma}"  style="width:180px" required="true">
+                                                <f:selectItem itemLabel="--Seleccione--" itemValue="" />
+                                                <c:forEach var="programa" items="#{programaBecaMB.listaProgramas()}">
+                                                    <f:selectItem itemLabel="#{programa.nombrePrograma}" itemValue="#{programa.idPrograma}"/>
+                                                </c:forEach>
+                                                <p:ajax event="change" listener="#{becaMB.addNewProgramaBeca()}" process="@this" update="formAdmin:acordion:programaBecas"/>
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.organismoCooperante}" for="idOrganismoCop"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectOneMenu id="idOrganismoCop" value="#{becaMB.organismoCooperanteSelected.idOrganismo}"  style="width:180px" required="true">
+                                                <f:selectItem itemLabel="--Seleccione--" itemValue="" />
+                                                <c:forEach var="cop" items="#{organismoCooperanteMB.listaOrganismos()}">
+                                                    <f:selectItem itemLabel="#{cop.nombreOrganismo}" itemValue="#{cop.idOrganismo}"/>
+                                                </c:forEach>
+                                                <p:ajax event="change" listener="#{becaMB.addNewOrganismo()}" process="@this" update="formAdmin:acordion:idOrganismoCop"/>
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.paisDestino}" for="paiscooperante"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectOneMenu id="paiscooperante" value="#{becaMB.paisDestinoSelected.idPais}"  style="width:180px" required="true">
+                                                <f:selectItem itemLabel="--Seleccione--" itemValue="" />
+                                                <c:forEach var="pais" items="#{paisMB.listaPaises()}">
+                                                    <f:selectItem itemLabel="#{pais.nombrePais}" itemValue="#{pais.idPais}"/>
+                                                </c:forEach>
+                                                <p:ajax event="change" listener="#{becaMB.addNewPais()}" process="@this" update="formAdmin:acordion:paiscooperante"/>
+                                                <!--<p:ajax event="change" listener="#{becaMB.getUniversidadesPorPais(becaMB.paisDestinoSelected.idPais)}" process="@this" update="universidadDestino"/>-->
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.universidadDestino}" for="universidadDestino"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectOneMenu id="universidadDestino" value="#{becaMB.universidadSelected.idOrganismo}"  style="width:180px" required="true">
+                                                <f:selectItem itemLabel="--Seleccione--" itemValue="" />
+                                                <c:forEach var="universidad" items="#{becaMB.universidadList}">
+                                                    <f:selectItem itemLabel="#{universidad.nombreOrganismo}" itemValue="#{universidad.idOrganismo}"/>
+                                                </c:forEach>
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel  value="#{lbecas.anioGestion}" for="aniogestionbeca" />
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectOneMenu id="aniogestionbeca" value="#{becaMB.anio}" style="width:180px" required="true">
+                                                <c:forEach begin="0" end="125" varStatus="loop">
+                                                    <c:set var="currentYear" value="${becaMB.yearActual-loop.index} " />
+                                                    <f:selectItem itemValue="#{currentYear}" itemLabel="#{currentYear}"/>
+                                                </c:forEach>
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.fechaInicio}"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:calendar id="desdeMovilidad" pattern="dd/MM/yyyy"  navigator="true" yearRange="c-50:c+10" value="#{becaMB.beca.fechaInicio}">
+                                                <p:ajax event="dateSelect" update="fechafin" />
+                                            </p:calendar>
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.fechaFinalizacion}"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:calendar id="fechafin" pattern="dd/MM/yyyy" navigator="true" yearRange="c-50:c+10" value="#{becaMB.beca.fechaFin}">
+                                                <f:attribute name="desdeMovilidad" value="#{becaMB.beca.fechaInicio}"/>
+                                                <f:validator validatorId="fechaMayorValidator"/>
+                                            </p:calendar>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.tipoFinanciamiento}" for="tipoFinanciamiento"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectOneMenu  id="tipoFinanciamiento" value="#{becaMB.tipoModalidaBecaSelected.idTipoModalidad}"  style="width:180px" required="true">
+                                                <f:selectItem itemLabel="--Seleccione--" itemValue="" noSelectionOption="true"/>
+                                                <c:forEach var="modalidad" items="#{becaMB.tipoModalidadBecaList}">
+                                                    <f:selectItem itemLabel="#{modalidad.modalidad}" itemValue="#{modalidad.idTipoModalidad}"/>
+                                                </c:forEach>
+                                                <p:ajax event="change" listener="#{becaMB.mostrarCampo()}" update="montointerno montoexterno mint" process="@this" partialSubmit="true"/>
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.tipoMonedaExterna}" for="tipomoneda"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectOneMenu  id="tipomoneda" value="#{becaMB.tipoCambioSelected.idTipoCambio}"  style="width:180px" required="true">
+                                                <f:selectItem itemLabel="--Seleccione--" itemValue="" noSelectionOption="true"/>
+                                                <c:forEach var="tipoCambio" items="#{tipoCambioMB.listaTipoCambio()}">
+                                                    <f:selectItem itemLabel="#{tipoCambio.nombreDivisa}" itemValue="#{tipoCambio.idTipoCambio}"/>
+                                                </c:forEach>
+                                                <p:ajax event="change" listener="#{becaMB.addNewTipoMoneda()}" process="@this" update="formAdmin:acordion:tipomoneda"/>
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column >
+                                            <p:outputLabel  value="#{lbecas.montoExterno}" for="montoexterno"/>
+                                        </p:column>
+                                        <p:column>
+                                            <pe:inputNumber value="#{becaMB.beca.montoExterno}" id="montoexterno" required="true">
+                                                <p:ajax event="blur" listener="#{becaMB.cambiarMontoBeca}" update="montototal" />
+                                            </pe:inputNumber>
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel  value="#{lbecas.montoInterno}" for="montointerno" id="mint"/>
+                                        </p:column>
+                                        <p:column>
+                                            <pe:inputNumber value="#{becaMB.beca.montoInterno}" disabled="#{becaMB.mostrarmonto}" id="montointerno" required="#{!becaMB.mostrarmonto}">
+                                                <p:ajax event="blur" listener="#{becaMB.cambiarMontoBeca}" update="montototal" />
+                                            </pe:inputNumber>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.montoTotal}"/>
+                                        </p:column>
+                                        <p:column>
+                                            <pe:inputNumber value="#{becaMB.beca.montoTotal}" id="montototal" readonly="true" />
+                                        </p:column>
+                                        <p:column>
+                                            <p:outputLabel value="#{lbecas.otorgada}" for="idOtorgada"/>
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectOneMenu id="idOtorgada" value="#{becaMB.beca.otorgada}" style="width: 180px" required="true" validatorMessage="esto es requerido">
+                                                <f:selectItem itemLabel="--Seleccione--" itemValue="#{null}" noSelectionOption="true"/>
+                                                <f:selectItem itemValue="#{true}" itemLabel="Si" />
+                                                <f:selectItem itemValue="#{false}" itemLabel="No" />
+                                            </p:selectOneMenu>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row>
+                                        <p:column>
+                                            <h:outputText value="Agregar Coordinador Academico Interno?: " />
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectBooleanButton id="btnInterno" value="#{becaMB.tabInternoBoolean}" onLabel="Si" offLabel="No" onIcon="ui-icon-check" offIcon="ui-icon-close" style="width:60px">
+                                                <p:ajax update="aidiInterno" listener="#{becaMB.changeInterno}" />
+                                            </p:selectBooleanButton>
+                                        </p:column>
+                                        <p:column>
+                                            <h:outputText value="Agregar Coordinador Academico Externo?: " />
+                                        </p:column>
+                                        <p:column>
+                                            <p:selectBooleanButton id="btnExterno" value="#{becaMB.tabExternoBoolean}" onLabel="Si" offLabel="No" onIcon="ui-icon-check" offIcon="ui-icon-close" style="width:60px">
+                                                <p:ajax update="aidiExterno" listener="#{becaMB.changeExterno}" />
+                                            </p:selectBooleanButton>
+                                        </p:column>
+                                    </p:row>
+                                </p:panelGrid>
+                            </p:tab>
+                            <p:tab title="Datos del Coordinador Academico Interno"  >
+                                <h:panelGroup id="aidiInterno">
+                                    <h:panelGroup id="pgroupBuscadorAsesorInterno" rendered="#{!becaMB.actualizar and becaMB.mostrarTabInterno or (becaMB.actualizar and becaMB.noEstabaInterno and becaMB.mostrarTabInterno)}">
+                                        <p:panelGrid id="pGridBuscadorAsesorInterno">
+                                            <p:column>
+                                                <p:outputLabel for="tipoBusquedaAsesorInternoId" value="Tipo de Busqueda:" />
+                                            </p:column>
+                                            <p:column>                                        
+                                                <p:selectOneMenu id="tipoBusquedaAsesorInternoId" value="#{becaMB.tipoBusquedaAsesorInterno}"  style="width:125px">  
+                                                    <p:ajax  listener="#{becaMB.habilitarAutoAsesorInterno()}" update="pgroupBuscadorAsesorInterno,panelInterno,botonesInterno"  process="tipoBusquedaAsesorInternoId"/>
+                                                    <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true" />                                                                           
+                                                    <f:selectItem itemLabel="Nombre/Apellido" itemValue="nombre" />                                                                           
+                                                    <f:selectItem itemLabel="E-mail" itemValue="email" />
+                                                    <f:selectItem itemLabel="Documento" itemValue="doc" />  
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                            <p:column>
+                                                <p:outputLabel  value="Busqueda" />     
+                                            </p:column>
+                                            <p:column>
+                                                <p:autoComplete id="searchDuiAsesorInterno" minQueryLength="10" size="10" rendered="#{becaMB.flagSearchDuiAsesorInterno}"  value="#{becaMB.asesorInternoAux}" completeMethod="#{becaMB.methodSearchAsesorInterno}"
+                                                                var="name" itemLabel="#{name.duiPersona}" itemValue="#{name}" converter="#{personaConverter}"
+                                                                forceSelection="true">                                            
+                                                    <p:column>
+                                                        <h:outputText value="#{name.duiPersona}" />
+                                                    </p:column>
+                                                    <p:ajax event="itemSelect" listener="#{becaMB.buscarInternoSinParametro()}" update="panelInterno,botonesInterno" process="@this"/>
+                                                </p:autoComplete>
+                                                <p:watermark for="searchDuiAsesorInterno" value="DUI"/> 
+
+                                                <p:autoComplete id="searchNombreAsesorInterno" value="#{becaMB.asesorInternoAux}" rendered="#{becaMB.flagSearchNombreAsesorInterno}"
+                                                                completeMethod="#{becaMB.methodSearchAsesorInterno}"
+                                                                var="theme" itemLabel="#{theme.nombrePersona}#{theme.apellidoPersona}" itemValue="#{theme}" converter="#{personaConverter}" 
+                                                                forceSelection="true">                                           
+                                                    <p:column>
+                                                        <h:outputText value="#{theme.nombrePersona} #{theme.apellidoPersona}" />
+                                                    </p:column>
+                                                    <p:ajax event="itemSelect" listener="#{becaMB.buscarInternoSinParametro()}" process="@this" update="panelInterno,botonesInterno"/>
+                                                </p:autoComplete>
+                                                <p:watermark for="searchNombreAsesorInterno" value="Nombre/Apellido"/>
+                                                <p:autoComplete id="searchMailAsesorInterno" value="#{becaMB.asesorInternoAux}" rendered="#{becaMB.flagSearchEmailAsesorInterno}"
+                                                                completeMethod="#{becaMB.methodSearchAsesorInterno}"
+                                                                var="theme" itemLabel="#{theme.emailPersona}" itemValue="#{theme}" converter="#{personaConverter}" 
+                                                                forceSelection="true">                                           
+                                                    <p:column>
+                                                        <h:outputText value="#{theme.emailPersona}" />
+                                                    </p:column>
+                                                    <p:ajax event="itemSelect" listener="#{becaMB.buscarInternoSinParametro()}" process="@this" update="panelInterno,botonesInterno"/>
+                                                </p:autoComplete>
+                                                <p:watermark for="searchMailAsesorInterno" value="E-mail"/> 
+                                            </p:column>
+                                        </p:panelGrid>
+                                    </h:panelGroup>
+                                    <h:panelGroup id="botonesInterno">
+                                        <p:column>
+                                            <p:commandButton value="Nuevo" icon="ui-icon-plus" actionListener="#{becaMB.presionoNuevoInterno()}" rendered="#{becaMB.renderNuevaPersonaInternaButton and becaMB.mostrarTabInterno}" process="@this" update="panelInterno"/>
+                                            <p:commandButton value="Editar" icon="ui-icon-pencil" actionListener="#{becaMB.presionoActualizarInterno()}" rendered="#{becaMB.renderActualizarPersonaInternaButton and becaMB.mostrarTabInterno}" process="@this" update="panelInterno"/>
+                                        </p:column>
+                                    </h:panelGroup>
+                                    <p:separator rendered="#{becaMB.mostrarTabInterno}"/>
+                                    <p:panelGrid id="panelInterno" rendered="#{becaMB.mostrarTabInterno}">
+                                        <p:row>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.nombre}" for="nombreAsesorInterno"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputText id="nombreAsesorInterno" value="#{becaMB.asesorInterno.nombrePersona}" required="true" disabled="#{becaMB.disableInternoInputs}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.apellidos}" for="apellidoAsesorInterno"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputText id="apellidoAsesorInterno" value="#{becaMB.asesorInterno.apellidoPersona}" required="true" disabled="#{becaMB.disableInternoInputs}"/>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.dui}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputMask id="duiAsesorInterno" mask="########-#" value="#{becaMB.asesorInterno.duiPersona}" disabled="#{becaMB.disableInternoInputs}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.correo}" for="correoAsosorInterno"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputText id="correoAsosorInterno" value="#{becaMB.asesorInterno.emailPersona}" required="true" disabled="#{becaMB.disableInternoInputs}">
+                                                    <f:validator validatorId="com.sisrni.validator.emailValidator"/>
+                                                </p:inputText>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.cargo}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputText id="cargoAsesorInterno" value="#{becaMB.asesorInterno.cargoPersona}" disabled="#{becaMB.disableInternoInputs}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.facultadUnidad}" for="facultadUnidadAI"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:selectOneMenu id="facultadUnidadAI" value="#{becaMB.facuniSelectded}"  style="width:180px" required="true" disabled="#{becaMB.disableInternoInputs}">
+                                                    <f:selectItem itemLabel="--Seleccione--" itemValue="" noSelectionOption="true"/>
+                                                    <p:ajax event="change" listener="#{becaMB.onFacUniChange}" update="escuelaDep edId" process="@this"/>
+                                                    <c:forEach var="fac" items="#{becaMB.facultadesUnidadesList}">
+                                                        <f:selectItem itemLabel="#{fac.label}" itemValue="#{fac.value}"/>
+                                                    </c:forEach>
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.escuelaDepartamento}" for="escuelaDep" id="edId"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:selectOneMenu id="escuelaDep" value="#{becaMB.escuelaDeptoInterno.idEscuelaDepto}"  style="width:180px" required="#{becaMB.esFacultad}" disabled="#{becaMB.disableInternoInputs}">
+                                                    <f:selectItem itemLabel="--Seleccione--" itemValue="" noSelectionOption="true"/>
+                                                    <c:forEach var="escDep" items="#{becaMB.escuelaDepartamentoList}">
+                                                        <f:selectItem itemLabel="#{escDep.descripcion}" itemValue="#{escDep.idEscuelaDepto}"/>
+                                                    </c:forEach>
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.telefonoInstitucional}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputMask id="telefonoFijoAsesorInterno" value="#{becaMB.telefonoFijoAsesorInterno.numeroTelefono}" mask="+503-####-####" disabled="#{becaMB.disableInternoInputs}"/>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.telefonoCelular}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputMask id="telefonoCelularAsesorInterno" value="#{becaMB.telefonoCelularAsesorInterno.numeroTelefono}" mask="+503-####-####" disabled="#{becaMB.disableInternoInputs}"/>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row>
+                                            <p:column>
+                                                <p:commandButton value="Desvincular" icon="ui-icon-person" actionListener="#{becaMB.confirmarDesvincularInterno()}" process="@this" rendered="#{becaMB.actualizar and !becaMB.noEstabaInterno}"/>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                    <p:outputLabel value="Para ingresar datoss del Coordinador Academico Interno active la opcion en la seccion de beca" rendered="#{!becaMB.mostrarTabInterno}"/>
+                                </h:panelGroup>
+                            </p:tab>
+                            <p:tab title="Datos del Coordinador Academico Externo">
+                                <h:panelGroup id="aidiExterno">
+                                    <h:panelGroup id="pgroupBuscadorAsesorExterno" rendered="#{!becaMB.actualizar and becaMB.mostrarTabExterno}">
+                                        <p:panelGrid id="pGridBuscadorAsesorExterno">
+                                            <p:column>
+                                                <p:outputLabel for="tipoBusquedaAsesorExternoId" value="Tipo de Busqueda:" />
+                                            </p:column>
+                                            <p:column>                                        
+                                                <p:selectOneMenu id="tipoBusquedaAsesorExternoId" value="#{becaMB.tipoBusquedaAsesorExterno}"  style="width:125px">  
+                                                    <p:ajax  listener="#{becaMB.habilitarAutoAsesorExterno()}" update="pgroupBuscadorAsesorExterno,panelExt,botonesExterno"  process="tipoBusquedaAsesorExternoId"/>
+                                                    <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true" />                                                                           
+                                                    <f:selectItem itemLabel="Nombre/Apellido" itemValue="nombre" />                                                                           
+                                                    <f:selectItem itemLabel="E-mail" itemValue="email" />
+                                                    <f:selectItem itemLabel="Documento" itemValue="doc" />  
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                            <p:column>
+                                                <p:outputLabel  value="Busqueda" />     
+                                            </p:column>
+                                            <p:column>
+                                                <p:autoComplete id="searchDuiAsesorExterno" minQueryLength="10" size="10" rendered="#{becaMB.flagSearchDuiAsesorExterno}"  value="#{becaMB.asesorExternoAux}" completeMethod="#{becaMB.methodSearchAsesorExterno}"
+                                                                var="name" itemLabel="#{name.duiPersona}" itemValue="#{name}" converter="#{personaConverter}"
+                                                                forceSelection="true">                                            
+                                                    <p:column>
+                                                        <h:outputText value="#{name.duiPersona}" />
+                                                    </p:column>
+                                                    <p:ajax event="itemSelect" listener="#{becaMB.buscarExternoSinParametro()}" update="panelExt,botonesExterno" process="@this"/>
+                                                </p:autoComplete>
+                                                <p:watermark for="searchDuiAsesorExterno" value="DUI"/> 
+
+                                                <p:autoComplete id="searchNombreAsesorExterno" value="#{becaMB.asesorExternoAux}" rendered="#{becaMB.flagSearchNombreAsesorExterno}"
+                                                                completeMethod="#{becaMB.methodSearchAsesorExterno}"
+                                                                var="theme" itemLabel="#{theme.nombrePersona}#{theme.apellidoPersona}" itemValue="#{theme}" converter="#{personaConverter}" 
+                                                                forceSelection="true">                                           
+                                                    <p:column>
+                                                        <h:outputText value="#{theme.nombrePersona} #{theme.apellidoPersona}" />
+                                                    </p:column>
+                                                    <p:ajax event="itemSelect" listener="#{becaMB.buscarExternoSinParametro()}" process="@this" update="panelExt,botonesExterno"/>
+                                                </p:autoComplete>
+                                                <p:watermark for="searchNombreAsesorExterno" value="Nombre/Apellido"/>
+                                                <p:autoComplete id="searchMailAsesorExterno" value="#{becaMB.asesorExternoAux}" rendered="#{becaMB.flagSearchEmailAsesorExterno}"
+                                                                completeMethod="#{becaMB.methodSearchAsesorExterno}"
+                                                                var="theme" itemLabel="#{theme.emailPersona}" itemValue="#{theme}" converter="#{personaConverter}" 
+                                                                forceSelection="true">                                           
+                                                    <p:column>
+                                                        <h:outputText value="#{theme.emailPersona}" />
+                                                    </p:column>
+                                                    <p:ajax event="itemSelect" listener="#{becaMB.buscarExternoSinParametro()}" process="@this" update="panelExt,botonesExterno"/>
+                                                </p:autoComplete>
+                                                <p:watermark for="searchMailAsesorExterno" value="E-mail"/> 
+                                            </p:column>
+                                        </p:panelGrid>
+                                    </h:panelGroup>
+                                    <h:panelGroup id="botonesExterno">
+                                        <p:column>
+                                            <p:commandButton value="Nuevo" icon="ui-icon-plus" actionListener="#{becaMB.presionoNuevoExterno()}" rendered="#{becaMB.renderNuevaPersonaExternaButton}" process="@this" update="panelExt"/>
+                                            <p:commandButton value="Editar" icon="ui-icon-pencil" actionListener="#{becaMB.presionoActualizarExterno()}" rendered="#{becaMB.renderActualizarPersonaExternaButton}" process="@this" update="panelExt"/>
+                                        </p:column>
+                                    </h:panelGroup>
+                                    <p:separator rendered="#{becaMB.mostrarTabExterno}"/>
+                                    <p:panelGrid id="panelExt" rendered="#{becaMB.mostrarTabExterno}">
+                                        <p:row>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.nombre}" for="nombreAsesorExterno"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputText id="nombreAsesorExterno" value="#{becaMB.asesorExterno.nombrePersona}" required="true" disabled="#{becaMB.disableExternoInputs}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.apellidos}" for="apellidoAsesorExterno"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputText id="apellidoAsesorExterno" value="#{becaMB.asesorExterno.apellidoPersona}" required="true" disabled="#{becaMB.disableExternoInputs}"/>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.pasaporte}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputText id="pasaporteAsesorExterno" value="#{becaMB.asesorExterno.pasaporte}" disabled="#{becaMB.disableExternoInputs}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.correo}" for="correoAsesorExterno"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputText id="correoAsesorExterno" value="#{becaMB.asesorExterno.emailPersona}" required="true" disabled="#{becaMB.disableExternoInputs}">
+                                                    <f:validator validatorId="com.sisrni.validator.emailValidator"/>
+                                                </p:inputText>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.cargo}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputText id="cargoAsesorExterno" value="#{becaMB.asesorExterno.cargoPersona}" disabled="#{becaMB.disableExternoInputs}"/>
+                                            </p:column>
+                                            <p:column >
+                                                <p:outputLabel value="#{lbecas.entidadInstitucion}" for="entidadAsesorExterno"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:selectOneMenu id="entidadAsesorExterno" value="#{becaMB.entidadInstitucionSelected.idOrganismo}"  style="width:180px" required="true" disabled="#{becaMB.disableExternoInputs}">
+                                                    <f:selectItem itemLabel="--Seleccione--" itemValue="" />
+                                                    <c:forEach var="entidad" items="#{becaMB.organismoList}">
+                                                        <f:selectItem itemLabel="#{entidad.nombreOrganismo}" itemValue="#{entidad.idOrganismo}"/>
+                                                    </c:forEach>
+                                                    <p:ajax listener="#{becaMB.onchangeListInstitucionPersona()}"  update="telefonoFijoAsesorExterno,telefonoCelularAsesorExterno"/>
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.telefonoInstitucional}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputMask id="telefonoFijoAsesorExterno" mask="#{becaMB.mascaraTelefono}" value="#{becaMB.telefonoFijoAsesorExterno.numeroTelefono}" disabled="#{becaMB.disableExternoInputs}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:outputLabel value="#{lbecas.telefonoCelular}"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:inputMask id="telefonoCelularAsesorExterno" mask="#{becaMB.mascaraTelefono}" value="#{becaMB.telefonoCelularAsesorExterno.numeroTelefono}" disabled="#{becaMB.disableExternoInputs}"/>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row>
+                                            <p:column>
+                                                <p:commandButton value="Desvincular" icon="ui-icon-person" actionListener="#{becaMB.confirmarDesvincularExterno()}" process="@this" rendered="#{becaMB.actualizar and !becaMB.noEstabaExterno}"/>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                    <p:outputLabel value="Para ingresar datoss del Coordinador Academico Externo active la opcion en la seccion de beca" rendered="#{!becaMB.mostrarTabExterno}"/>
+                                </h:panelGroup>
+                            </p:tab>
+                        </p:accordionPanel>
+                    </p:panel>
+                    <p:commandButton rendered="#{becaMB.actualizar}" styleClass="boton" actionListener="#{becaMB.cancelar()}" process="@this" value="Cancelar" icon="ui-icon-cancel" id="btnCancelar" title="Cancelar"/>
+                    <p:commandButton rendered="#{becaMB.actualizar}" styleClass="boton" actionListener="#{becaMB.guardarBeca()}" process="formAdmin " update="formAdmin" value="Actualizar" icon="ui-icon-refresh" id="btnActualizar" title="Actualizar Beca"/>
+                    <p:commandButton rendered="#{!becaMB.actualizar}" styleClass="boton" actionListener="#{becaMB.cancelar()}" process="@this" update="formAdmin" value="Cancelar" icon="ui-icon-cancel" id="btnregresar" title="volver"/>
+                    <p:commandButton rendered="#{!becaMB.actualizar}" styleClass="boton" actionListener="#{becaMB.preGuardar()}" process="formAdmin" update="formAdmin" value="Guardar" icon="ui-icon-disk" id="btnGuardarBeca" title="Guardar Beca"/>
+                </center>
+            </h:form>
+            <p:separator/>
+            <p:confirmDialog widgetVar="dataChangeBecarioDlg" message="Ya existe el becario que desea ingresar, Est&aacute;a seguro que desea Actualizar los datos?" header="Existe Becario"  global="true">
+                <p:commandButton value="Si"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check"  action="#{becaMB.siRemplazarBecario()}" process="@this" update=":formAdmin"/>
+                <p:commandButton value="No" styleClass="ui-confirmdialog-no" icon="ui-icon-close" action="#{becaMB.noRemplazarBecario()}" process="@this" update=":formAdmin"/>
+            </p:confirmDialog>
+            <p:confirmDialog widgetVar="dataChangeInternoDlg" message="Ya existe el coordinador academico Interno que desea ingresar, Est&aacute; seguro que desea Actualizar los datos?" header="Existe Coordinador Interno"  global="true">
+                <p:commandButton value="Si"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check"  action="#{becaMB.siRemplazarInterno()}" process="@this" update=":formAdmin"/>
+                <p:commandButton value="No" styleClass="ui-confirmdialog-no" icon="ui-icon-close" action="#{becaMB.noRemplazarInterno()}" process="@this" update=":formAdmin"/>
+            </p:confirmDialog>
+            <p:confirmDialog widgetVar="dataChangeExternoDlg" message="Ya existe el coordinador Externo que desea ingresar, Est&aacute; seguro que desea reemplazar los datos?" header="Existe Coordinador externo"  global="true">
+                <p:commandButton value="Si"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check"  action="#{becaMB.siRemplazarExterno()}" process="@this" update=":formAdmin"/>
+                <p:commandButton value="No" styleClass="ui-confirmdialog-no" icon="ui-icon-close" action="#{becaMB.noRemplazarExterno()}" process="@this" update=":formAdmin"/>
+            </p:confirmDialog>
+            <p:confirmDialog widgetVar="dataDesvincularInternoDlg" message="Seguro que desea desvincular el coordinador Academico Intenro?" header="Desvincular Coordinador Interno"  global="true">
+                <p:commandButton value="Si"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check"  action="#{becaMB.desvincularInterno()}" process="@this" update=":formAdmin"/>
+                <p:commandButton value="No" type="button"  styleClass="ui-confirmdialog-no" icon="ui-icon-close" onclick="PF('dataDesvincularInternoDlg').hide();"/>
+            </p:confirmDialog>
+            <p:confirmDialog widgetVar="dataDesvincularExternoDlg" message="Seguro que desea desvincular el coordinador Academico Externo?" header="Desvincular Coordinador Externo"  global="true">
+                <p:commandButton value="Si"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check"  action="#{becaMB.desvincularExterno()}" process="@this" update=":formAdmin"/>
+                <p:commandButton value="No" type="button"  styleClass="ui-confirmdialog-no" icon="ui-icon-close" onclick="PF('dataDesvincularExternoDlg').hide();"/>
+            </p:confirmDialog>
+        </ui:define>
+    </ui:composition>
+</html>

@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+        <ui:define name="content">
+            <center>
+                <h1 style="background: #cc0000;color: white;border-radius: 10px">Administraci&oacute;n de Becas Internacionales Cortas</h1>
+            </center>   
+            <h:form id="formAdmin">
+                <p:panelGrid >
+                    <p:row>
+                        <p:column  >
+                            <p:commandButton styleClass="boton" icon="ui-icon-plus"
+                                             actionListener="#{becaMB.crearNuevo()}" process="@this" update=":formTable"
+                                             value="Nueva Beca" />
+                        </p:column>
+                    </p:row>
+
+                </p:panelGrid>
+
+            </h:form>
+            <p:separator/>
+            <h:form id="formTable">            
+                <p:dataTable var="beca" value="#{becaMB.becaTableList}" paginator="true" rows="15"                          
+                             paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                             rowsPerPageTemplate="5,10,15"                       
+                             >
+                    <p:column  headerText="No." sortBy="#{beca.idBeca}" filterBy="#{beca.idBeca}" style="width: 6%" filterStyle="width:100%">
+                        <h:outputText value="#{beca.idBeca}" />
+                    </p:column>
+                    <p:column  headerText="Programa Beca" sortBy="#{beca.programaBeca}" style="width: 13%" filterBy="#{beca.programaBeca}"  >
+                        <h:outputText value="#{beca.programaBeca}" />
+                    </p:column>
+                    <p:column headerText="Becario" sortBy="#{beca.nombreBecario}" filterBy="#{beca.nombreBecario}" filterStyle="width:90%">
+                        <h:outputText value="#{beca.nombreBecario} #{beca.apellidoBecario}" />
+                    </p:column>
+                    <p:column headerText="Facultad" sortBy="#{beca.facultad}" filterBy="#{beca.facultad}" filterStyle="width:90%">
+                        <h:outputText value="#{beca.facultad}" />
+                    </p:column>
+                    <p:column headerText="Pa&iacute;s Destino" sortBy="#{beca.paisDestino}" filterBy="#{beca.paisDestino}" style="width: 12%" filterStyle="width:100%">
+                        <h:outputText value="#{beca.paisDestino}" />
+                    </p:column>
+                    <p:column headerText="Universidad Destino" sortBy="#{beca.universidadDestino}" filterBy="#{beca.universidadDestino}" style="width: 16%" filterStyle="width:100%">
+                        <h:outputText value="#{beca.universidadDestino}" />
+                    </p:column>
+                    <p:column headerText="Monto" sortBy="#{beca.montoBeca}" filterBy="#{beca.montoBeca}" style="width: 8%" filterStyle="width:100%">
+                        <h:outputText value="#{beca.montoBeca}">
+                            <f:convertNumber type="currency" currencySymbol="$" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="A&ntilde;o" sortBy="#{beca.anioGestion}" filterBy="#{beca.anioGestion}" style="width: 7%" filterStyle="width:100%">
+                        <h:outputText value="#{beca.anioGestion}"/>
+                    </p:column>
+                    <p:column headerText="Otorgada" sortBy="#{beca.otorgada}" filterBy="#{beca.otorgada}" style="width: 10%" filterStyle="width:100%">
+                        <h:outputText value="#{beca.otorgada}" />
+                    </p:column>
+                    <p:column headerText="Opciones" style="width: 8%">
+                        <div style="float: left">
+                            <p:commandLink styleClass="ui-icon ui-icon-pencil" title="Editar" 
+                                           value="Editar" actionListener="#{becaMB.preUpdate(beca.idBeca)}"/>
+                        </div>
+                        <div style="float: left">
+                            <p:commandLink styleClass="ui-icon ui-icon-search" title="Editar" 
+                                           value="Consultar" actionListener="#{becaConsultarMB.preUpdate(beca.idBeca)}"/>
+                        </div>
+                        <div style="float: left">
+                            <p:commandLink styleClass="ui-icon ui-icon-close" title="Eliminar" 
+                                           value="Eliminar" actionListener="#{becaMB.preEliminar(beca.idBeca)}"/>
+                        </div>
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+            <p:confirmDialog widgetVar="eliminarBecaDialogo" message="¿Est&aacute; seguro que desea eliminar la beca?" header="Eliminar Beca"  global="true">
+                <p:commandButton value="Si"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check"  action="#{becaMB.eliminarBeca()}" process="@this" update=":formTable"/>
+                <p:commandButton value="No"  styleClass="ui-confirmdialog-no" icon="ui-icon-close"  action="#{becaMB.cancelareEiminarBeca()}" process="@this" update=":formTable"/>
+            </p:confirmDialog>
+        </ui:define>
+    </ui:composition>
+</html>

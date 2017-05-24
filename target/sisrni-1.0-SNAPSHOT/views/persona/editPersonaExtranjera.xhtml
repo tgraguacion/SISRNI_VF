@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html  template="/WEB-INF/templates/layout.xhtml"
+       xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:p="http://primefaces.org/ui"
+       xmlns:pe="http://primefaces.org/ui/extensions">
+
+
+    <ui:composition>
+        <script type="text/javascript">
+                    $.mask.definitions['9'] = '';
+                    $.mask.definitions['#'] = '[0-9]';
+                </script>
+        <p:dialog id="PersonaEditDlg" widgetVar="PersonaEditDialog"  resizable="false"  modal="true" appendTo="@(body)" header="Edici&oacute;n de Persona Eterna" closeOnEscape="true">
+<!--            <p:ajax event="close"  oncomplete="myrefresh();"></p:ajax>  -->
+
+            <h:form id="formEditPersona">
+                <center>                  
+                    <h:panelGrid columns="2" >
+                        <p:column>  
+                            <p:outputLabel for="idNombrePersona" value="Nombre Persona" />
+                        </p:column>                                         
+                        <p:column>                                                                                                                                                                                             
+                            <p:inputText id="idNombrePersona"  required="true" label="Nombre" value="#{personaMB.persona.nombrePersona}"/>
+                            <p:watermark for="idNombrePersona" value="Nombre de la Persona" id="watermarkNombre" />
+                            <p:message for="idNombrePersona" />                                       
+                        </p:column>
+
+                        <p:column>  
+                            <p:outputLabel for="idApellido" value="Apellido Persona" />
+                        </p:column>                                         
+                        <p:column> 
+                            <p:inputText id="idApellido"  required="true" label="Apellido" value="#{personaMB.persona.apellidoPersona}"/>
+                            <p:watermark for="idApellido" value="Apellido de la Persona" id="watermarkApeliido" />
+                            <p:message for="idApellido" />
+                        </p:column>
+
+                        <p:column>
+                             <p:outputLabel for="emailPersona" value="Correo Electr&oacute;nico"/>
+                        </p:column>
+                        <p:column>
+                             <p:inputText id="emailPersona" label="emailPersona" value="#{personaMB.persona.emailPersona}" required="true" >
+                               <f:validator validatorId="com.sisrni.validator.emailValidator"/>
+                             </p:inputText>
+                               <p:watermark for="emailPersona" value="email@email.com" id="watermarkEmail" />
+                            <p:message for="emailPersona" display="tooltip" />   
+                        </p:column>
+                        
+                        <p:column>  
+                            <p:outputLabel for="idOrganismo" value="Organismo" />
+                        </p:column>                                         
+                        <p:column>                                         
+                            <p:selectOneMenu id="idOrganismo"  panelStyle="width:160px" style="width: 100%" value="#{personaMB.persona.idOrganismo}"  effect="fade" converter="#{organismoConverter}" required="true">                                           
+                                <f:selectItem itemLabel="--Seleccione--" itemValue="null" noSelectionOption="true" />  
+                                <f:selectItems value="#{personaMB.listadoOrganismo}" var="organismo" itemLabel="#{organismo.nombreOrganismo}" itemValue="#{organismo}"/>  
+                             <p:ajax listener="#{personaMB.onchangeListInstitucionPersona()}"  update="telPersona,celPersona"/>
+                            </p:selectOneMenu>                                                                               
+                        </p:column> 
+                        
+                         <p:column>
+                           <p:outputLabel for="telPersona" value="Tel&eacute;fono Institucional"/>
+                         </p:column>
+                         <p:column>
+                           <p:inputMask id="telPersona" label="telPersona" mask="#{personaMB.mascaraTelefono}"   value="#{personaMB.telefonoFijo.numeroTelefono}"/>
+                            <p:watermark for="telPersona"  value="#{personaMB.mascaraTelefono}"  />   
+                         </p:column>
+                         <p:column>
+                             <p:outputLabel for="celPersona" value="Tel&eacute;fono m&oacute;vil"/>
+                         </p:column>
+                         <p:column>
+                            <p:inputMask id="celPersona" label="celPersona" mask="#{personaMB.mascaraTelefono}"  value="#{personaMB.telefonoCell.numeroTelefono}"/>
+                             <p:watermark for="celPersona"  value="#{personaMB.mascaraTelefono}"  />     
+                         </p:column>
+                          <p:column> 
+                            <p:outputLabel for="passaporte" value="Pasaporte" />
+                        </p:column> 
+                        <p:column> 
+                            <p:inputText id="passaporte" label="pasaporte" value="#{personaMB.persona.pasaporte}"/>
+                            <p:watermark for="passaporte" value="pasaporte" id="watermarkPass" />
+                            <p:message for="passaporte" /> 
+                        </p:column> 
+
+                        <p:column>
+                            <p:outputLabel for="personaActivo" value="Estado:"/>
+                        </p:column>
+                         <p:column>
+                             <p:selectOneMenu id="personaActivo" value="#{personaMB.persona.activo}"  style="width: 100%" required="true" >
+                                <f:selectItem itemLabel="--Seleccione--" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItem itemLabel="Activo" itemValue="#{true}" />
+                                <f:selectItem itemLabel="Inactivo" itemValue="#{false}" />
+                            </p:selectOneMenu>
+                        </p:column>  
+                        
+                               
+                        <p:column>
+                            <p:commandButton value="Guardar" id="idGuardarPersona" actionListener="#{personaMB.editarExterna()}" process="@form" update="PersonaCreateDlg" icon="ui-icon-disk"/> 
+                            <p:commandButton value="Cerrar" id="idCerrar" process="@this" icon="ui-icon-closethick" immediate="true" actionListener="#{personaMB.cancelarPersona()}"  />
+                        </p:column>
+                    </h:panelGrid>
+                </center>    
+            </h:form>  
+        </p:dialog>
+
+        <script type="text/javascript">
+            /**
+             * Faces Validator
+             */
+            PrimeFaces.validator['custom.emailValidator'] = {
+                pattern: /\S+@\S+/,
+                validate: function (element, value) {
+                    //use element.data() to access validation metadata, in this case there is none.
+                    if (!this.pattern.test(value)) {
+                        throw {
+                            summary: 'Validation Error',
+                            detail: value + ' is not a valid email.'
+                        }
+                    }
+                }
+            };
+        </script>
+
+
+
+
+    </ui:composition>
+</html>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition 
+                template="/WEB-INF/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+    
+    <ui:define name="content">
+         <center> 
+            <p:panel style="width: 70%">
+                <h2 class="title ui-widget-header ui-corner-all" align="center">Gesti&oacute;n de Tipos de Facultades</h2>  
+        <h:form id="formAdmin">
+               
+                <p:panelGrid id="idGrilPrincipal" columns="2" >
+               
+                    <p:column>
+                        <p:outputLabel for="nombreFacultad" value="Nombre del Tipo de Facultad:" />
+                    </p:column>
+                    <p:column>
+                        <p:inputText id="nombreFacultad" value="#{tipoFacultadMB.tipoFacultad.nombreTipoFacultad}" required="true" size="50" />
+                    </p:column>
+               
+                    <p:column>
+                        <p:outputLabel for= "descri" value="Descripci&oacute;n del Tipo de Facultad:" />
+                    </p:column>
+                    <p:column>
+                        <p:inputTextarea id="descri" value="#{tipoFacultadMB.tipoFacultad.descripcion}" rows="2" maxlength="300" style="width: 100%" required="true" />
+                    </p:column>
+                    
+                    <p:column  >
+                        <p:commandButton rendered="#{!tipoFacultadMB.actualizar}"  styleClass="boton" icon="ui-icon-disk"
+                                         actionListener="#{tipoFacultadMB.guardarTipoFacultad()}" update="formAdmin :formPrincipal" process="@this :formAdmin"
+                                         value="Guardar" />
+                       
+                        <p:commandButton rendered="#{tipoFacultadMB.actualizar}" styleClass="boton" icon="ui-icon-cancel"
+                                         actionListener="#{tipoFacultadMB.cancelarTipoFacultad()}" immediate="true" value="Cancelar" update="formAdmin"  process="@this" />
+                        
+                         
+                       
+                        <p:commandButton rendered="#{tipoFacultadMB.actualizar}" styleClass="boton" icon="ui-icon-refresh"
+                                         actionListener="#{tipoFacultadMB.updateTipoFacultad()}" update="formAdmin :formPrincipal"
+                                         value="Actualizar" /> 
+                       
+                    </p:column>
+                 
+                </p:panelGrid>
+        </h:form> 
+        <h:outputLabel style="margin-bottom: 20px;"/>
+      
+        <h:form id="formPrincipal">
+                <p:dataTable var="facultad" value="#{tipoFacultadMB.listadoTipoFacultad}"  rows="10"
+                             paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                             rowsPerPageTemplate="5,10,15"
+                             paginator="true">
+
+
+                    <p:column headerText="Nombre Tipo de Facultad" sortBy="#{facultad.nombreTipoFacultad}" filterBy="#{facultad.nombreTipoFacultad}">
+                        <h:outputText value="#{facultad.nombreTipoFacultad}" />
+                    </p:column>
+
+                    <p:column headerText="Descripci&oacute;n" sortBy="#{facultad.descripcion}" filterBy="#{facultad.descripcion}">
+                        <h:outputText value="#{facultad.descripcion}" />
+                    </p:column>
+                    <p:column headerText="Opciones" >
+                        <div style="float: left">
+                            <p:commandLink styleClass="ui-icon ui-icon-pencil" title="Editar" 
+                                           value="Editar" actionListener="#{tipoFacultadMB.preUpdate(facultad)}" update=":formAdmin" process="@form :formPrincipal"/>
+                        </div>
+                        <div style="float: left">
+                            <p:commandLink styleClass="ui-icon ui-icon-closethick"
+                                           title="Eliminar" value="Eliminar"
+                                           actionListener="#{tipoFacultadMB.preDeleteTipoFacultad(facultad)}" update=":idEliminacion" />
+                        </div>
+                      
+                    </p:column>
+                </p:dataTable>  
+        </h:form>
+
+         </p:panel>     
+        </center> 
+        
+        <p:confirmDialog widgetVar="dataChangeDlg" message="&iquest;Est&aacute; seguro que desea eliminar el Tipo de Facultad?" header="Eliminar Tipo Facultad"  global="true">
+            <h:form id="idEliminacion"> 
+             
+                 <h:outputText value="Nombre del Tipo de Facultad : "  style="font-weight:bold"/>
+                 <h:outputText value="#{tipoFacultadMB.delTipoFacultad.nombreTipoFacultad}" />
+                 <br/>
+                 <br/>
+                 <h:outputText value="Descripci&oacute;n del Tipo de Facultad : "  style="font-weight:bold" />
+                 <h:outputText value="#{tipoFacultadMB.delTipoFacultad.descripcion}" />
+             
+            </h:form>    
+            
+            <p:separator />
+            <p:commandButton value="S&iacute;"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check"  action="#{tipoFacultadMB.deleteTipoFacultad()}" process="@this" update=":formPrincipal"/>
+               <p:commandButton value="No" type="button"  styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+        </p:confirmDialog>
+
+    </ui:define>
+</ui:composition>
